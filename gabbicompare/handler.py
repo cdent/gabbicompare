@@ -59,8 +59,12 @@ class CompareHandler(base.ResponseHandler):
                 path = test.replace_template(path)
                 source_match = self.json.extract_json_path_value(data, path)
                 target_match = self.json.extract_json_path_value(test.response_data, path)
-                test.assertEqual(source_match, target_match,
-                        "Expecting %s, got %s" % (source_match, target_match))
+                if isinstance(source_match, float) and isinstance(target_match, float):
+                    test.assertAlmostEqual(source_match, target_match,
+                            msg="Expecting %d, got %d" % (source_match, target_match))
+                else:
+                    test.assertEqual(source_match, target_match,
+                            "Expecting %s, got %s" % (source_match, target_match))
 
     def action(self, test, path, value=None):
         pass
