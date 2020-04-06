@@ -1,0 +1,74 @@
+#
+# Get the TDD ballrolling.
+#
+
+
+defaults:
+    verbose: true
+    request_headers:
+        content-type: application/json
+        accept: application/json
+    response_compare:
+        # The other base url source of data.
+        source: http://ds1:8000
+        # Default this to empty so that tests won't fail.
+        paths: []
+
+tests:
+
+- name: syntax
+  GET: /
+  response_json_paths:
+      $.versions[0].id: v1
+  response_compare:
+      # Each member of paths is checked against the URL of the test (the GET)
+      # and the same URL at source. If they are equal, the test passes.
+      paths:
+          # "v1"
+          - $.versions[0].id
+
+- name: replacement
+  GET: /
+  response_json_paths:
+      $.versions[?id = "v1"].links[0].href: /v1
+  response_compare:
+      paths:
+          - $.versions[?id = "$RESPONSE['$.versions[0].id']"].id
+
+
+- name: kpiq
+  POST: /v1/some_url
+  data:
+      start: 1586092769000
+      end: 1586179169000
+      resolution: 15m
+      range: all
+      window: custom
+      group_by_time: true
+      group_by_cell: false
+  response_json_paths:
+      $.kpi_name: dl_throughput
+
+- name: kpiq compare
+  POST: /v1/some_url
+  data:
+      start: 1586092769000
+      end: 1586179169000
+      resolution: 15m
+      range: all
+      window: custom
+      group_by_time: true
+      group_by_cell: false
+  response_compare:
+      paths:
+          - $.values[?timestamp = $RESPONSE['$.values[0].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[1].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[2].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[3].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[4].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[5].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[6].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[7].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[8].timestamp']]
+          - $.values[?timestamp = $RESPONSE['$.values[9].timestamp']]
+          - $.values.`len`
