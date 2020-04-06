@@ -22,7 +22,7 @@ class CompareHandler(base.ResponseHandler):
 
     def __call__(self, test):
         """Implement our own to make the HTTP call."""
-        if test.test_data[self._key] and len(test.test_data[self._key].get('paths')):
+        if test.test_data[self._key] and test.test_data[self._key].get('paths'):
             self.preprocess(test)
             if not isinstance(
                     test.test_data[self._key], type(self.test_key_value)):
@@ -33,6 +33,7 @@ class CompareHandler(base.ResponseHandler):
             # This is our additions.
             paths = test.test_data[self._key]['paths']
             source = test.test_data[self._key]['source']
+            source = test.replace_template(source)
             parsed_source = urlparse.urlsplit(source)
             parsed_url = urlparse.urlsplit(test.url)
             headers = test.test_data['request_headers']
